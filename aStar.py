@@ -94,7 +94,9 @@ class A_Star:
                 self.__show_path(close_list)
                 return -1 
             
-            # check vertex's neighbors 
+            # expand the node
+            # check vertex's neighbors
+            expanded_list = []
             for neighbor, weight  in vertex.neighbors.items():
                 if not isinstance(neighbor, Node):
                     raise print("{0} is not an instance of Node".format(neighbor))
@@ -105,16 +107,53 @@ class A_Star:
                     gn = self.__compute_gn(close_list, neighbor) # computation fron start_node to nth node
                     fn = gn + hn
                     
-                    open_list.append((fn, neighbor))
-                    
-            open_list.sort() # sort list in asc ord
+                    expanded_list.append((fn, neighbor))
+            
+            
+            self.__merge_sort(expanded_list) # sort list in desc ord
+            
+            for pair in expanded_list:
+                open_list.insert(0, pair) # insert the expanded neighbor to the first
             
             print("Loop #{0} end -----------------".format(loop_counter))
             loop_counter += 1
         
         print("\n\nGoal Unreachable!!")
         return -1
+    
+    def __merge_sort(self, array:list):
+        if len(array) > 1:
             
+            mid = len(array) // 2
+            
+            L = array[:mid]
+            R = array[mid:]
+            
+            self.__merge_sort(L)
+            
+            self.__merge_sort(R)
+            
+            i = j = k = 0
+            
+            while i < len(L) and j < len(R):
+                if L[i][0] > R[j][0]:
+                    array[k] = L[i]
+                    i += 1
+                else:
+                    array[k] = R[j]
+                    j += 1
+                k += 1
+                
+            while i < len(L):
+                array[k] = L[i]
+                i += 1
+                k += 1
+            
+            while j < len(R):
+                array[k] = R[j]
+                j += 1
+                k += 1
+    
     def __show_path(self, close_list):
         print("Path: ", end="")
         print(*close_list, sep=" -> ")
@@ -122,7 +161,7 @@ class A_Star:
     def __display_open_list(self, open_list):
         print("OL:")
         for fn, node in open_list:
-            print("\t({0}. {1})".format(fn, node))
+            print("\t({0}, {1})".format(fn, node))
     
     def __display_close_list(self, close_list):
         print("CL:")
